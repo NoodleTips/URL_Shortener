@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+     <style>
+        body {
+            background-color: black;
+            background-image: url('static/images/shrekbg.jpg');
+            background-size: cover;
+            background-position: center;
+            color: #13D8E8;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            margin-top:250px;
+        }
+        label {
+           font-size: 2rem;
+           text-shadow: 3px 3px hotpink, -3px 3px hotpink, 3px -3px hotpink, -3px -3px hotpink;
+           padding: 5px;
+        }
+        input, button {
+            font-size: 1.2rem;
+            background-color: black;
+            color: #13D8E8;
+            border: 1px solid #13D8E8;
+            padding: 10px;
+        }
+        input[type="url"] {
+            color: hotpink;
+        }
+        button:hover {
+            background-color: #13D8E8;
+            color: black;
+        }
+        .shortened-url {
+            font-size: 2rem;
+            margin-top: 20px;
+        }
+        #result {
+            margin-top: 40px;
+            font-size: 20px;
+            color: #FF0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>URL Shortener</h1>
+        <form id="shorten-form">
+            <label for="url">Enter your URL:</label>
+            <input type="url" id="url" name="url" required>
+            <button type="submit">Shorten</button>
+        </form>
+        <div id="result">
+            <span id="short-url" class="shortened-url"></span>
+            <button id="copy-button" style="display:none">Copy</button>
+            <span id="copy-message" style="display.none"></span>
+        </div>
+    </div>
+    <script>
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            const copyMessage = document.getElementById('copy-message');
+            copyMessage.innerText = 'Copied!';
+            copyMessage.style.display = 'inline';
+            setTimeout(() => {
+               copyMessage.style.display = 'none';
+            }, 2000);
+        }
+
+        document.getElementById('shorten-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const url = document.getElementById('url').value;
+            const response = await fetch('/api/shorten', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('short-url').innerText = data.short_url;
+                document.getElementById('copy-button').style.display = 'inline';
+                document.getElementById('copy-button').onclick = function () {
+                    copyToClipboard(data.short_url);
+                };
+            }
+        });
+    </script>
+</body>
+</html>
